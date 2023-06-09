@@ -1,0 +1,63 @@
+---
+title: "Assingment 3"
+author: "Emmanuel Sowunmi"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+library(modelr)
+```
+
+From the Data set, one would expect that the cut, clarity and carat would have significant efect on the price of the diamonds. But contrary to intuition, cut and clarity don't seem to have a significant effect on th data set. They seem to have a normal distribution when checked individually. That is there are more very good and premium cuts than fair and ideal cuts. And there are more vs1 and vs2 than IF and I1 clarity. Only carat seems to have a significant correlation with price where the higher the carat, the higher the price. This is shown in the tables below.
+
+```{r}
+ggplot(data = diamonds) +
+  geom_boxplot(mapping = aes(x = cut, y = price)) 
+
+ggplot(data = diamonds) +
+  geom_boxplot(mapping = aes(x = clarity, y = price)) 
+
+ggplot(data = diamonds) +
+  geom_smooth(mapping = aes(x = carat, y = price)) 
+```
+
+Upon a 3 dimesional facet analysis of cut and clarity to the price and carat, we see that carat increses with price across all cuts and clarity. The figure below confirms this.
+
+```{r}
+ggplot(data = diamonds) +
+  geom_point(mapping = aes(x = carat, y = price)) +
+  facet_wrap(~clarity ,nrow = 2)
+  
+ggplot(data = diamonds) +
+  geom_point(mapping = aes(x = carat, y = price)) +
+  facet_wrap(~cut ,nrow = 2)
+```
+
+
+
+
+
+From both facets above, we see that price increases with carat with both the cut and clarity.
+
+
+```{r}
+table(clarity = diamonds$cut, cut = diamonds$clarity)
+```
+
+We can see from the frequency table above that the frequency distribution with regards to clarity and cut shows the results as the first and second tables. It shows that ther are more diamonds that are VS1 and VS2 cuts and very good and premium clarity. 
+
+In the following figure, well explore what adding a third variable ('carat') to the frequency table does. I changed the resuting table to a dataframe because the display was too long and ultimately not nery useful in analysis. I then arranged the table in order of decreasing carat beause it had a strong relationship to the price.
+
+```{r}
+tab1 = table(clarity = diamonds$cut, cut = diamonds$clarity, carat = diamonds$carat)
+
+x = as.data.frame(tab1)
+x = arrange(x, desc(carat))
+
+head(x, 20)
+
+```
+The table shows that the clarity progresses from fair to good to very good to premium and finally to ideal with descending carat At the same time the the cut goes from I1 to SI2 to SI1 to VS2 to VS1 to VVS2 to VS1 to If with the decrease of the carat. Considering the strong relationship between Carat and price, we can conclude that the order of each variable will be the effect it has on the price of the diamonds. 
+

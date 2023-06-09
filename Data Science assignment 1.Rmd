@@ -1,0 +1,163 @@
+---
+title: "Data Science Assignment 1"
+author: "Emmanuel Sowunmi"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+Question 1
+
+Function to get true value of i
+```{r, results='hide'}
+calc_i <- function(i){
+  d=c()
+  for (j in 1:20){
+    i <- (1 - (1 + i)^(-20)) / 19
+    d = c(round(i, 5), d)
+  }
+  
+  d = rev(d)
+  return(d)
+  #return(round(i, 5))
+}
+```
+
+Calling function with a starting value of 0.006
+```{r}
+calc_i(0.006)
+```
+
+Calling function with a starting value of 0.007
+```{r}
+calc_i(0.005)
+```
+
+Calling function with a starting value of 0.008
+```{r}
+calc_i(0.004)
+```
+
+
+Displaying the data for all three starting values in a table
+```{r}
+table<-data.frame(calc_i(0.006), calc_i(0.005), calc_i(0.004))
+table
+```
+
+True Value from the example 1
+```{r}
+i <- 0.006
+for (j in 1:1000){
+i <- (1 - (1 + i)^(-20)) / 19
+}
+i
+```
+
+
+Summary of conclusion
+
+From the observation, we can conclude that the closer the intial starting guess we use, the less itterations it takes.
+
+Question 2
+
+function to calculate interest
+```{r}
+compound_interest = function(P, n){
+  if (n <= 3){
+    i = 0.04
+  }else {
+    i = 0.05
+  }
+  
+  for(j in n){
+    interest = P*((1+i)^j-1)
+  }
+  
+  return(interest)
+}
+```
+
+interest for initial investment amount 1000 with 2 years term
+```{r}
+a = compound_interest(1000, 2)
+a
+```
+
+interest for initial investment amount 1000 with 10 years term
+```{r}
+b = compound_interest(1000, 10)
+b
+```
+
+Summary
+We can see the rate of growth with the same starting investment amount over two different terms, one long and one short, is growing at a very rapid pace. 
+
+Question 3
+
+function using while loop to iteratively calculate the interest
+```{r}
+interest_function = function(i){
+  j = 0
+  count = 0
+  while(abs(i-j) > 0.000001){
+    j = i
+    i = (1-(1+i)^-20)/19
+    count = count + 1
+  }
+  return(c(i, count))
+}
+```
+
+Result using a starting guess of i = 0.004
+```{r}
+interest_function(0.004)[1]
+```
+number of iterations for starting guess of i = 0.004
+```{r} 
+interest_function(0.004)[2]
+```
+
+Result using a starting guess of i = 0.005
+```{r}
+interest_function(0.005)[1]
+```
+number of iterations for starting guess of i = 0.005
+```{r}
+interest_function(0.005)[2]
+```
+
+Result using a starting guess of i = 0.006
+```{r}
+interest_function(0.006)[1]
+```
+number of iterations for starting guess of i = 0.006
+```{r}
+interest_function(0.006)[2]
+```
+
+Result using a starting guess of i = 0.007
+```{r}
+interest_function(0.007)[1]
+```
+number of iterations for starting guess of i = 0.007
+```{r}
+interest_function(0.007)[2]
+```
+
+Summary
+we can see the effect of the choice of initial starting values affect the number of iterations that happens before the break condition is met. We can see that lower values will have more iterations while larger values will have shorter iterations.
+
+Question 4
+Showing updated roots in each iteration
+```{r}
+x <- 1 # initial guess of the root
+f <- x^4 + 3*x^3 - 2*x^2 - 7
+tolerance <- 0.000001
+while (abs(f) > tolerance){
+  f.prime <- 4*x^3 + 9*x^2 - 4*x
+  x <- x - f / f.prime
+  print(x)
+  f <- x^4 + 3*x^3 - 2*x^2 - 7
+}
+print(c('aprox root = ', x))
+```

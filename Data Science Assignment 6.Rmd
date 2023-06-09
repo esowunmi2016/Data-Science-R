@@ -1,0 +1,100 @@
+---
+title: "Untitled"
+author: "Emmanuel Sowunmi"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  # html_document: default
+---
+
+```{r, results='hide', message=FALSE}
+library(HSAUR2)
+library(ggplot2)
+library(tidyverse)
+```
+
+
+For this analysis, I will filter the data set to include only diamonds with fair and ideal cuts
+```{r}
+sub_diamonds = diamonds %>% 
+  filter(cut == 'Fair' | cut == 'Ideal')
+
+# sub_diamonds
+```
+
+Before fitting the model, I will analyse a simple scatter plot of the sub-data to see any obvious correlations and get a good initial visualization of the data.
+
+```{r}
+ggplot(sub_diamonds, aes(carat, price))+
+  geom_point()
+```
+
+From the graph above,  we see a direct correlation between the increase in carat and price. We can also notice that the amount of diamonds cluster around diamonds with carat that are multiples of 0.5 (1, 1.5, 2, 2.5 and 3). lastly, we can see that the correlation weakens the higher the carat gets and this is noticeable for carat greater than 3.
+
+Next, i will fit the data set to a linear model to make more predictions.
+```{r}
+fit = lm(price ~ carat, data = sub_diamonds)
+summary(fit)
+
+```
+We can see that the model has a very low p-value, rejecting the null hypothesis and signifying statistical significance of the carat on price. We also get a fitted line formula of (Price = -2127.13 + 7771.17 * Carat) and from this, we see that the significance is about 7771.17 per increase in carat which is the coefficient of carat. 
+
+
+Before fitting the model for price vs cut(fair and ideal), I will analyse a simple box-plot of the sub-data to see any obvious correlations and get a good initial visualization of the data.
+```{r}
+ggplot(sub_diamonds, aes(cut, price))+
+  geom_boxplot()
+```
+From the box plot above, we can visually see a slight difference in average price between fair and ideal cut. Contrary to intuition, the plot shows that fair cuts have a higher average price than ideal cuts. We can also see that there seems to be more diamonds with ideal cuts than fair cuts.
+
+Next, I will fit a model for price per cut for fair vs ideal cuts using fair cut as my reference group to investigate further.
+
+```{r}
+sub_diamonds$cut = factor(as.character(sub_diamonds$cut), levels = c('Fair','Ideal')) 
+fit = lm(price ~ cut, data = sub_diamonds)
+summary(fit)
+```
+From the model, we get a p value of less than 5% for ideal cut meaning that there is a statistical difference of cut on price and rejects the null hypothesis. Having the prices as the response variable and the fair cut as the reference group, we see that there is a 901.22 decrease in price going from fair to ideal cut which confirms our observation from the box-plot. There may be various reasons for this but i will wait till i fit a multiple linear model which accounts for cut and carat as i suspect that the carat might have something to do with the unexpected behavior. 
+
+
+MLR price by cut and clarity
+Before fitting the multiple linear model, I will make a scatter plot involving all variables to spot any visible patterns
+```{r}
+ggplot(sub_diamonds, aes(carat, price, color = cut, alpha=cut))+
+  geom_point()
+```
+From the Scatter plot, We can observe that Ideal cuts have a higher average price for diamonds with the same carat. We also see that the deviation discussed in the earlier scatter plot contains mostly fair cut diamonds.
+
+I will fit a multiple linear model to investigate further.
+```{r, message=FALSE}
+fit = lm(price ~ carat + cut, data = sub_diamonds)
+summary(fit)
+
+ggplot(sub_diamonds, aes(carat, price, color = cut, alpha = cut))+
+  geom_point()+
+  geom_smooth(, mapping = aes(y = predict(fit, sub_diamonds)))
+```
+summary
+From the model above we see that when carat is accounted for, there is a 1836.45 increase in price from fair to ideal cuts based on the estimated coefficient of cut (ideal). This is directly contrary to the information from the simple linear model of price by cut (fair and ideal) only where there was a decrease in price from fair to ideal cuts. This confirms my earlier suspicion of carat having a role in the unorthodox predicted behavior. We can also observe a 7974.56 increase in price per increase in carat based on the estimated coefficient of carat. I will make another scatter-plot of price by carat and cut including the regression lines to visually explain this. 
+
+To get a better model, i will fit another multiple linear model with interaction term
+
+```{r, message=FALSE}
+fit = lm(price ~ carat * cut, data = sub_diamonds)
+summary(fit)
+
+
+ggplot(sub_diamonds, aes(carat, price, color = cut, alpha = cut))+
+  geom_point()+
+  geom_smooth(, mapping = aes(y = predict(fit, sub_diamonds)))
+```
+
+
+From the graph above, we see that on average, for diamonds with the same price, the fair cut have a higher carat than the ideal cut which would explain why the model shows diamonds of lower quality cut having a higher price. with the Alpha filter applied to cut, we also see that there are significantly more diamonds with ideal cut than fair cut confirming our observation from the earlier box-plots.
+
+
+Summary
+From the analysis of the diamond sub-data set, we can observe certain key-points. Firstly, we see that carat alone is directly and strongly correlated with price where an increase in carat also increases the price for both Fair and Ideal cuts. This was predicted in our initial scatter plot and confirmed by the fitted model of price vs carat.
+Secondly, we are able to see that, contrary to intuition, better cut did not necessarily increase the price of the diamonds. This was observed in the box-plot and confirmed by the fitted linear model of price by cut.
+Thirdly, we saw that the combined effect of carat and price came out to be a direct positive correlation between better cut, increase in carat and increase in price where Ideal cut diamonds with higher carat were lower than fair cut diamonds with lower carat.
+Lastly, we were able to recognize that very high carat diamonds (roughly > 3 carats) had a lower quality cut (Fair cut) but higher price. This was noticed earlier in the first scatter plot (price by carat) where we saw a deviation from it initially strong correlation, and later on with the cut separated by color where we were able to observe that most of those diamonds were of fair cut. This may be because, in the diamond industry, higher carat diamonds are not so easy to cut and generally is not meant for commercial or public use like wedding rings but for industrial purposes like a diamond drill. so the cut and perhaps other aesthetic qualities like clarity is not as important for those very high carat diamonds, but the price is still higher. It would also explain why, though it is more expensive, it is not as expensive as the prediction given by the multiple linear model as the model still takes those aesthetic qualities into account regardless of how high the carat of the diamonds are while in the real world, those qualities are over looked.

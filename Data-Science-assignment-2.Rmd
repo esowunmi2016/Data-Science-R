@@ -1,0 +1,100 @@
+---
+title: "Data Science Assignment 2"
+author: "Emmanuel Sowunmi"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+Library
+
+```{r, results='hide'}
+library(tidyverse)
+library(gridExtra)
+library(patchwork)
+```
+
+Excersise 3.1
+
+Question 1
+
+I will be using city (cty) as my continuous variable and class as my categorical value
+```{r, warning=FALSE}
+graph_1 = ggplot(mpg)+
+  geom_point(aes(displ, hwy, color = cyl))
+
+graph_2 = ggplot(mpg)+
+  geom_point(aes(displ, hwy,  color = class ))
+
+graph_3 = ggplot(mpg)+
+  geom_point(aes(displ, hwy, size = cyl))
+
+graph_4 = ggplot(mpg)+
+  geom_point(aes(displ, hwy,  size = class ))
+
+graph_5 = ggplot(mpg)+
+  geom_point(aes(displ, hwy, shape = cyl))
+
+graph_6 = ggplot(mpg)+
+  geom_point(aes(displ, hwy,  shape = class ))
+
+
+#grid.arrange(graph_1, graph_2, graph_3, graph_4, graph_6, graph_4, ncol = 2)
+
+graph_1+graph_2+graph_3+graph_4+graph_3+graph_6 +plot_layout(ncol=2)
+
+```
+
+
+*Color is good for continuous variables because it is represented as a spectrum which is visually appealing and easy to understand.color is also a good option for categorical variables because it maps out the categories clearly and is also easy to understand.
+
+*Size is not good for representing continuous or categorical variables because small differences in size may not be recognized. Also if the graph is small as above, the sizes clump together and you cant even identify all categories. 
+
+*Shape is god for categorical variables that are under 7 categories because each category will easily be recognozed. Shape is not good for categorical variables with 7 or more categories and continuous variables because there will not be enough shapes to cover all categories.
+
+
+Summary
+From the scatter plots above, we can see that
+
+
+Question 2
+
+from the exercise above, we can conclude that the color mapping is a good way to display a third continuous variable
+```{r}
+ggplot(mpg)+
+  geom_point(aes(displ, hwy, color = cyl))
+```
+
+From the lecture notes, we can also see that the opacity (alpha) is also a good way to map out a third continuous variable
+
+```{r}
+ggplot(mpg)+
+  geom_point(aes(displ, hwy, alpha = cyl))
+```
+
+Summary
+
+From the plots above, we can conclude that cars with lower cylinders have higher high way miles and lower engine displacement
+
+
+Exercise 4.1.1
+Question 1
+
+```{r}
+ggplot(mpg)+
+  geom_point(aes(hwy, cty))
+```
+From the plot we can see that highway miles per gallon is always higer than city miles per gallon.
+
+Summary
+From the scatter plot above, we can conclude that on average, the same cars miles per gallon in the city is usually less than that of the highway.
+
+Question 2
+```{r}
+
+ggplot(mpg, aes(hwy, cty))+
+  geom_point()+
+  facet_wrap(~ trans, nrow = 2)
+```
+
+Summary
+

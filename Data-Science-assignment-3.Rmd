@@ -1,0 +1,143 @@
+---
+title: "Data Science Assignment 3"
+author: "Emmanuel Sowunmi"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+Libraries
+```{r, results='hide'}
+library(nycflights13)
+library(tidyverse)
+```
+
+
+Exercise 2.4
+Question 1a
+flights that flew to three airports (Miami, Tampa, Fort Lauderdale) in Florida
+```{r}
+filter(flights, dest %in% c('MIA', 'TPA', 'FLL'))
+```
+
+Number of flights that flew to three airports (Miami International Airport, Tampa International Airport, Fort Lauderdale-Hollywood International Airport) in Florida is 31,249
+
+
+Question 1b
+flights that departed in Winter (December, January and February)
+```{r}
+filter(flights, month %in% c(1,2,12))
+```
+
+Number of flights that departed in Winter (December, January and February) is 80,090
+
+
+Question 1c
+Flights that were delayed at least an hour, but made up over 40 minutes in flight
+```{r}
+filter(flights, dep_delay >= 60 & arr_delay < -20)
+```
+
+Number of flights that were delayed at least an hour, but made up over 40 minutes in flight is 1
+
+
+Question 1d
+flights that Departed between midnight and 3am
+```{r}
+filter(flights, dep_time %in% c(0:3))
+```
+Number of flights that Departed between midnight and 3am is 86
+
+
+Exercise 3.1
+Question 1
+Most departure delayed flights
+```{r}
+a = arrange(flights, desc(dep_delay) )
+a = select(a, dep_delay)
+b = a[['dep_delay']][1]
+filter(a, dep_delay == b)
+```
+Number of flights for the most departure delay is 1?
+
+Flights that left the earliest
+```{r}
+a = arrange(flights, dep_delay)
+a = select(a, dep_delay)
+b = a[['dep_delay']][1]
+filter(a, dep_delay == b)
+```
+Number of flights that left the earliest is 1?
+
+
+
+Question 2
+a. I will use the  distance divided by time to find the fastest flights
+
+```{r}
+a = mutate(flights,
+  speed = distance / air_time * 60
+)
+a = arrange(a, desc(speed))
+select(a, air_time, distance, speed)
+```
+
+Conclusion
+From the table above, we can see that contrary to intuition, the speed of the flights is not solely based on air time.
+
+
+
+Exercise 5.2
+Question 1
+I expect a discordance between the departure time, scheduled departure and departure delay if the departure time is over midnight. In my analysis, i will calculate my own departure delay (custom_dep_delay) by converting the scheduled departure time and departure time into minutes before subtracting. I will then subtract the calculated departure in minutes from the calculated scheduled departure in minutes to get my custom departure delay.
+
+
+```{r}
+a = transmute(flights,
+sched_dep_time,
+sched_dep_hour = sched_dep_time %/% 100,
+sched_dep_minute = sched_dep_time %% 100,
+dep_time,
+dep_hour = dep_time %/% 100,
+dep_minute = dep_time %% 100,
+dep_delay,
+
+dep_delay_hour = (dep_hour - sched_dep_hour)*60,
+dep_delay_min = dep_minute - sched_dep_minute,
+
+custom_dep_delay = ((dep_hour-sched_dep_hour)*60)+(dep_minute - sched_dep_minute)
+)
+
+b = filter(a, dep_delay != custom_dep_delay)
+select(b, sched_dep_time, dep_time, dep_delay, custom_dep_delay)
+
+```
+Summary
+The table above displays the data in the total flights where the given departure delay conflicts with my calculated custom delay. From the table, we can see that all the data have departure time past midnight and a scheduled departure befor midnight. This confirms our initial pridiction.
+
+Exercise 6.1
+
+```{r}
+flight_groups = group_by(flights, carrier)
+z = summarize(flight_groups, arrival_delay = mean(arr_delay, na.rm = TRUE), departure_delay = mean(dep_delay, na.rm = TRUE))
+
+arrange(z, desc(arrival_delay))
+```
+
+From the analysis and table above, we can conclude that F9 had the worst arrival delay.
+SIDE NOTE: Coincidentally, we can also see that F9 also had the worst departure delay so that may be a factor in its long arrival delays.
+
+
+Exercise 7.1
+```{r}
+a = transmute(flights,
+  sched_dep_time,
+  sched_dep_hour = sched_dep_time %/% 100,
+  dep_delay,
+)
+
+hour_groups = group_by(a, sched_dep_hour)
+a = summarise(hour_groups, mean_dep_delay = mean(dep_delay, na.rm = TRUE))
+arrange(a, mean_dep_delay)
+```
+I think 5am is the best time to avoid departure delay from the table above because the analysis concludes that 5am is the hour with the lowest mean departure delay of about 0.6877. 
+

@@ -1,0 +1,203 @@
+---
+title: "Assignment 5"
+author: "Emmanuel Sowunmi"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(HSAUR2)
+```
+
+Exercise 5.1 a
+
+```{r}
+sub_set = filter(mpg, drv == '4' | drv == 'f')
+
+ggplot(sub_set, aes(drv, hwy))+
+  geom_boxplot()
+```
+
+Conclusion Based on the Box plot
+
+From the box plot above, we can see a bit of difference between the two groups (4 wheel drive and front wheel drive) with regard to highway miles. We can also notice a higher amount of 4-wheel drive vehicles than front wheel drive. We will check this observation with a t-test and a Wilcox test.
+
+
+```{r}
+t.test(hwy ~ drv, data = sub_set)
+```
+
+Summary based on t-test 
+
+From the t-test of highway by subset of drive (front wheel and 4 wheel drive), we get a p value of less than 5 percent which implies that there is significant difference and rejects the null hypothesis. This is also seen in the difference between the mean of the two drv classes (4wd and front-wd) from the t-test.
+
+```{r}
+wilcox.test(hwy ~ drv, data = sub_set)
+```
+
+Summary based on Wilcox Test
+
+From the Wilcox test, we get the same p value (estimate of < 2.2e-16) as in the t-test which was less than five percent. This confirms our assumption of no significant difference and rejection of the null hypothesis.
+
+Exercise 5.1 b
+
+```{r}
+sub_set2 = filter(mpg, class == 'compact' | class == 'subcompact')
+
+ggplot(sub_set2, aes(class, hwy))+
+  geom_boxplot()
+```
+Conclusion based on the Box plot
+
+From the box plot above, we see that the difference between the compact and subcompact car classes with respect to highway miles is very small. We will also check this observation with a t-test and a Wilcox test.
+
+
+
+```{r}
+t.test(hwy ~ class, data = sub_set2)
+```
+
+Summary based in T-Test
+
+from the t-test of highway by class (only compact and subcompact), we get a p value of greater than 5 percent which shows that there is no significant difference and does not reject the null hypothesis. This is clearly visible as the mean of the two classes are very close to each other.
+
+```{r}
+wilcox.test(hwy ~ class, data = sub_set2, exact = FALSE)
+```
+
+Summary Based on Wilcox Test
+
+From the Wilcox test we get the a similar p value as in the t-test which was less than five percent. This confirms our initial assumption of no significant difference from the box-plot and rejection of the null hypothesis.
+
+Conclusion
+
+From the analysis of the two sub-groups drv (4 wheel drive and front wheel drive) and class (compact and sub-compact) by highway miles, we see that there is a significant difference between the drv sub-group where front wheel drive has significantly higher highway miles on average but lower amount  than 4-wheel drive vehicles. This may explain a pattern where more people own cars that give them more (hwy) miles since the difference between the two is significant. On the other hand, we see no significant difference between the compact and sub-compact vehicles for the class sub-group. But from the box-plot, we notice a considerable difference in the amount of each group where subcompact cars are considerably more than compact cars. Because we have determined that highway miles is not a significant factor, This may signify an underlying factor that affects the choice of buyers to lean more towards sub-compact than compact like price, or city miles.
+
+Exercise 5.2
+
+Filtering the data set into 2 groups g1(carat = 1) and g2(0.95 < carat < 1)
+```{r}
+diamonds_grouped = filter(diamonds, carat == 1 | carat > 0.95 & carat < 1)
+
+diamonds_g1 = filter(diamonds_grouped, carat == 1 )
+diamonds_g2 = filter(diamonds_grouped, carat > 0.95 & carat < 1 )
+```
+
+Spearman's correlation test between the two groups (g1 and g2), We will have to convert both cut and clarity from catrgorical values to integers based on their ordinality (lowest value to highest) to be able to perform the spearmans correlation test on them.
+
+```{r}
+diamonds_mod_g1 = diamonds_g1 %>%
+  mutate(
+   
+    cut_new = factor(cut) %>%
+      unclass(),
+
+    clarity_new = factor(clarity) %>%
+      unclass(),
+)
+
+diamonds_mod_g2 = diamonds_g2 %>%
+  mutate(
+   
+    cut_new = factor(cut) %>%
+      unclass(),
+
+    clarity_new = factor(clarity) %>%
+      unclass(),
+)
+
+
+cor.test(diamonds_mod_g1$cut_new, diamonds_mod_g1$clarity_new ,method = 'spearman');
+
+cor.test(diamonds_mod_g2$cut_new, diamonds_mod_g2$clarity_new ,method = 'spearman');
+
+```
+
+From the evaluation of the Spearmans correlation between cut and clarity of the two groups (g1 and g2), we see that for g1, we get a p-value of 0.1358 which is greater than 5%. This tells us that there is no significant difference and does not reject the null hypothesis. But for group g2, we get a p value of 0.010006 which is less than 5%. From this we can conclude that there is a significant statistical difference between cut and clarity for group g2 since it rejects the null hypothesis.
+
+
+
+We will use a t-test between price and clarity for the two groups (g1 and g2) to compare the mean of the two groups
+```{r}
+t.test(diamonds_g1$price, diamonds_g1$carat)
+t.test(diamonds_g2$price, diamonds_g2$carat)
+
+x = diamonds %>% 
+  mutate(
+    new = ifelse(carat == 1, 'g1', ifelse(carat > 0.95 & carat <= 1, 'g2','g3'))
+  ) %>% 
+  filter(new == 'g1' | new == 'g2') 
+  
+t.test( price ~ new, data = x)
+```
+From the t-tests, we get a very small p-value ( < 2.23-16) which rejects the null hypothesis and shows that there is a significant difference between the price and carat for the 2 groups (g1 and g2). We can also see the difference in mean price ( g1: 5241.59 and g2: 3794.76...) is more than what we would expect for a carat difference of <= 0.05.
+
+
+
+Boxplot of Price by cut for g1 and g2
+
+```{r}
+
+ggplot(diamonds_g1, aes(cut, price))+
+  geom_boxplot()+
+  ggtitle('Price by Cut for g1')
+
+ggplot(diamonds_g2, aes(cut, price))+
+  geom_boxplot()+
+  ggtitle('Price by Cut for g2')
+
+```
+
+From the boxplots above, contrary to intuition, we see that the average price of very good cut is more than that of premium and even ideal in both groups. It is also worth noting that this difference is more pronounced in group g2 than in g1. We can also notice an even distribution in the amount of diamonds across all cuts in g1 but an uneven distribution in g2 with fair cut having noticeably more diamonds than all the others.
+
+
+
+Boxplot of Price by Clarity for g1 and g2
+```{r}
+ggplot(diamonds_g1, aes(clarity, price))+
+  geom_boxplot()+
+   ggtitle('Price by Clarity for g1')
+
+ggplot(diamonds_g2, aes(clarity, price))+
+  geom_boxplot()+
+   ggtitle('Price by Clarity for g2')
+
+```
+
+Unlike our plot for price by cut, the plots for price by clarity follows a more intuitive pattern (normal distribution) where the price increases with better clarity with the exception of SI1 and VS2 in g2. we also see the amount of diamonds increases with clarity for g1 but doesnt follow the same pattern for g2.
+
+
+```{r}
+g1_veryGood_ideal = diamonds_g1 %>% 
+  filter(cut == 'Very Good' | cut == 'Ideal')
+  
+t.test(price ~ cut, data = g1_veryGood_ideal, var.equal = FALSE)
+
+g2_veryGood_ideal = diamonds_g2 %>% 
+  filter(cut == 'Very Good' | cut == 'Ideal')
+  
+t.test(price ~ cut, data = g2_veryGood_ideal)
+  
+```
+From the t-test of price by cut for the two groups g1 and g2, we get a p value of 0.3889 and 0.3889 respectively. This shows us that there is no significant difference between the price by cut of ideal and very good cuts for the two groups g1 and g2 since both p values are greater than 5.
+
+
+For further investigation, i will plot a Box plot of price by cut filtered to only Very good and Ideal filled by clarity for g1 and g2
+```{r}
+
+ggplot(g1_veryGood_ideal, aes(cut, price))+
+  geom_boxplot(aes(fill = clarity))+
+  ggtitle('Price by Cut for g1 (clarity filled)')
+
+ggplot(g2_veryGood_ideal, aes(cut, price))+
+  geom_boxplot(aes(fill = clarity))+
+   ggtitle('Price by Cut for g2 (clarity filled)')
+```
+
+From these diagrams, we get a better sense of the relationship between the price, clarity, sub group of cut (very good and ideal) and carat grouped into g1(carat  = 1) and g2(carat > 0.95 and carat <1). For group g1 (carat = 1), we notice an increase in price with higher clarity for both the very good and ideal cuts. We can also notice more diamonds with higher clarity for the very good and ideal cuts with the exception of IF clarity for the ideal cut. It not only has a lower amount of diamonds but a significantly higher price.
+
+For the group g2 (carat > 0.95 and carat < 1), we see an increase in the price with better clarity, notably more in the very good than the ideal for both the very good and ideal cuts. The exception being the VSI clarity in the ideal cut. But when it comes to the amount of diamonds in clarity groups, we notice that it doesn't increase with clarity and is less predictable when compared to group g1 (carat = 1). We see that there are more diamonds towards the middle of the clarity class with respect to its ordinality and significantly less as its clarity increases. 
+
+The difference in distribution of amount of diamonds between group g1 and g2 suggests that people are not willing to pay more for higher clarity diamonds with carats lower than 1, no matter how small the difference is, even with very good or ideal cut. It could be the case that integers serve as markers to buyers, where they group diamonds with carat of 1 to 1.99 in the same group. this will explain the distribution of amount of diamonds normal at integers and not normal as it moves to the next integer.

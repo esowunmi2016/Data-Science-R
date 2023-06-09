@@ -1,0 +1,40 @@
+---
+title: "Data Science Assignment 7"
+author: "Emmanuel Sowunmi"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(survival)
+library(coin)
+```
+
+```{r}
+fit = survdiff(Surv(time, event) ~ group, data = glioma)
+fit
+```
+From the log rank test, we get a p-value of 3e-05 which is very low. Ince the pvalue is lower than 5%, This rejects the null hypothesis and shows there is a significant different in survival probability with time between the control group and the RIT group.
+
+```{r}
+plot(
+  survfit(Surv(time, event) ~ group, data = glioma),
+  col = c('blue', 'red'),
+  xlab = 'Time (Months)',
+  ylab = 'Population Survival probability'
+)
+legend(
+  "topright",
+  title = "Groups",
+  legend=c('Control Group','RIT'),
+  col=c('blue', 'red'),
+  lty=1:1,
+  bty='n'
+)
+
+```
+
+From the graph, we get a visual confirmation from our log-rank test conclusion. we see that there is a significant difference in survival percentage between patients treated with the novel radio-immunotherapy (RIT group) and those in the control group. The two groups start off roughly the same for the first 8 months with the control group losing about 5-6% of its survival probability. After this, the survival probability of the control group declines significantly, having about only 60% by the 10 month mark whereas the RIT group still had 100%. This difference in rate of decline is mostly maintained throughout.
+
+conclusion
+From the log rank test and with the visual confirmation from the graph, we see that there is a significant difference between the patients treated with the novel radio-immunotherapy versus those that were not which were the control group. We can conclude that the RIT group had a higher survival probability per time versus those in the control group.
